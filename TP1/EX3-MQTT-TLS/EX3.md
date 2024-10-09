@@ -8,7 +8,7 @@ We will also test the broker by using the Paho Python client to connect to the b
 
 **Note: this tutorial is done on a raspberry pi vm where the broker and clients are on the same local network, specifically the same vm.**
 
-**This lab was done by following the tutorial by Steve's Internet Guide. Link to rigibal article: http://www.steves-internet-guide.com/mosquitto-tls/**
+**This lab was done by following the tutorial by Steve's Internet Guide. Link to original article: http://www.steves-internet-guide.com/mosquitto-tls/**
 
 ## Step 1: create a key pair for the CA 
 
