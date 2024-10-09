@@ -1,4 +1,4 @@
-# EX3
+# EX3 MQTT - TLS configuration
 
 In this tutorial we will configure the mosquitto MQTT broker to use TLS security.
 
@@ -18,6 +18,10 @@ Command is:   `openssl genrsa -des3 -out ca.key 2048`
 
 Command is:  `openssl req -new -x509 -days 1826 -key ca.key -out ca.crt`
 
+When filling out the form, the common name is very important and it is usually the domain name of the server. You could use the IP address or Full domain name. However, the DNS server must be put into place and can resolve the FQDN of the server. 
+
+In this case, we don't have DNS configuered so we will the internal IP address of the server which is 192.168.64.131.
+
 ## Step 3: create a server key pair that will be used by the broker (not password protected because broker can't decode it)
 
 Command is: `openssl genrsa -out server.key 2048`
@@ -25,10 +29,6 @@ Command is: `openssl genrsa -out server.key 2048`
 ![Screenshot 2024-10-08 235041](https://github.com/user-attachments/assets/bed547c2-f6b9-47a3-98d8-a911030fb60d)
 
 ## Step 4: create a certificate request .csr. 
-
-When filling out the form, the common name is very important and it is usually the domain name of the server. You could use the IP address or Full domain name. However, the DNS server must be put into place and can resolve the FQDN of the server. 
-
-In this case, we don't have DNS configuered so we will the internal IP address of the server which is 192.168.64.131.
 
 Command is: `openssl req -new -out server.csr -key server.key`
 
