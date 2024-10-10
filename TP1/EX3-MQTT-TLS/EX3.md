@@ -32,6 +32,8 @@ Command is: `openssl genrsa -out server.key 2048`
 
 Command is: `openssl req -new -out server.csr -key server.key`
 
+**Note: Do not provide the exact same input as in step 2 execpt for the CA that should match. When provided the same input, it is then regarded as a single certificate solution and it will fail aftewards so even one letter difference does the trick.** In my case the organisation name field is different. 
+
 ## Step 5:  Now we use the CA key to verify and sign the server certificate. This creates the server.crt file
 
 Command is: `openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 360`
