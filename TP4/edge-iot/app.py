@@ -7,38 +7,64 @@ import threading
 
 app = Flask(__name__)
 
-# Simuler les données
-NUM_SENSORS = 5
+# Simulate number of sensors (for simplicity, 1 sensor monitoring power usage)
+NUM_SENSORS = 1
 data_buffers = {f"sensor_{i}": [] for i in range(NUM_SENSORS)}
 
+# Define the threshold to simulate a "spike"
+POWER_SPIKE_THRESHOLD = 70
+
+
 def simulate_sensor_data():
-    """Simulation des données en arrière-plan"""
+    """Simulate real-time power usage data in the background."""
     while True:
         for sensor_id in data_buffers.keys():
+            # Simulate power usage value between 0 and 100
             value = random.randint(0, 100)
+            
+            # Ensure we only keep the most recent 100 data points
             if len(data_buffers[sensor_id]) >= 100:
                 data_buffers[sensor_id].pop(0)
-            data_buffers[sensor_id].append(value)
-        time.sleep(0.5)
 
-# Démarrer la simulation dans un thread
+            # Append new simulated power usage value
+            data_buffers[sensor_id].append(value)
+        
+        time.sleep(0.5)  # Simulate data update every 0.5 seconds
+
+
+# Start data simulation in a background thread
 threading.Thread(target=simulate_sensor_data, daemon=True).start()
 
 
-# Fonction pour créer un graphique dynamique
 def create_plot():
-    """Génération dynamique du graphique avec Matplotlib"""
-    plt.figure(figsize=(10, 6))
+    """Generate dynamic real-time power usage plot with spike detection."""
+    plt.figure(figsize=(12, 6))
 
     for sensor_id, values in data_buffers.items():
-        plt.plot(values, label=sensor_id)
+        # Detect spikes for visualization
+        x_values = range(len(values))
+        spikes = [v if v > POWER_SPIKE_THRESHOLD else None for v in values]
 
-    plt.xlabel('Temps')
-    plt.ylabel('Valeurs')
-    plt.title('Simulation IoT en Temps Réel')
+        # Plot the general power usage line
+        plt.plot(x_values, values, label=f"{sensor_id} Power Usage")
+        
+        # Highlight spikes
+        plt.scatter(
+            [i for i, v in enumerate(spikes) if v is not None],
+            [v for v in spikes if v is not None],
+            color="red",
+            label="Spike",
+            s=20,
+        )
+
+    # Set axis labels, title, and legend
+    plt.xlabel('Time')
+    plt.ylabel('Power Usage (in Watts)')
+    plt.title('Real-Time Power Usage with Spike Detection')
     plt.legend()
     plt.grid()
-    
+
+    # Save plot to buffer
     buf = BytesIO()
     plt.savefig(buf, format="png")
     buf.seek(0)
@@ -46,20 +72,20 @@ def create_plot():
     return buf
 
 
-# Route principale pour l'affichage dynamique
+# Route for main page
 @app.route('/')
 def index():
-    """Page principale avec AJAX pour l'affichage dynamique"""
+    """Render the main HTML template with dynamic updates via AJAX."""
     return render_template('index.html')
 
 
-# Route pour l'image du graphique
+# Route to dynamically fetch the generated plot
 @app.route('/plot')
 def plot():
     buf = create_plot()
     return Response(buf, mimetype='image/png')
 
 
-# Lancer le serveur
+# Launch the server
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)
