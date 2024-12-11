@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-iot-power-app
+  labels:
+    app: edge-iot-power-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: edge-iot-power-app
+  template:
+    metadata:
+      labels:
+        app: edge-iot-power-app
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: "true" 
+      containers:
+      - name: app-test
+        image: yasminegharbi/edge-iot-power-app:latest
+        ports:
+        - containerPort: 5000
