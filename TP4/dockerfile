@@ -1,20 +1,24 @@
-# Utiliser une image Python officielle
 FROM python:3.9-slim
 
-# Définir le répertoire de travail
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# Copier les dépendances dans le conteneur
+# Copy requirements and install dependencies
 COPY requirements.txt .
-
-# Installer les dépendances
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copier l'application Python
-COPY app.py .
+# Copy application files
+COPY . .
 
-# Exposer le port pour l'API Flask
+# Expose the application port
 EXPOSE 5000
 
-# Commande pour démarrer l'application
+# Run the application
 CMD ["python", "app.py"]
+
