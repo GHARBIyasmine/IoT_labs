@@ -1,38 +1,65 @@
-from flask import Flask, jsonify
+from flask import Flask, Response, render_template
 import random
-import threading
 import time
+import matplotlib.pyplot as plt
+from io import BytesIO
+import threading
 
 app = Flask(__name__)
 
-# Simuler des capteurs IoT
-NUM_SENSORS = 5  # Nombre de capteurs simulés
-data_buffers = {f"sensor_{i}": [] for i in range(NUM_SENSORS)}  # Simuler un buffer de données par capteur
+# Simuler les données
+NUM_SENSORS = 5
+data_buffers = {f"sensor_{i}": [] for i in range(NUM_SENSORS)}
 
-# Fonction pour simuler la collecte de données
 def simulate_sensor_data():
+    """Simulation des données en arrière-plan"""
     while True:
         for sensor_id in data_buffers.keys():
-            # Générer une valeur aléatoire pour chaque capteur
             value = random.randint(0, 100)
-            # Limiter la taille du buffer à 10 valeurs
-            if len(data_buffers[sensor_id]) >= 10:
+            if len(data_buffers[sensor_id]) >= 100:
                 data_buffers[sensor_id].pop(0)
             data_buffers[sensor_id].append(value)
-        time.sleep(1)  # Simuler une collecte toutes les secondes
+        time.sleep(0.5)
 
-# Démarrer la simulation des capteurs dans un thread séparé
+# Démarrer la simulation dans un thread
 threading.Thread(target=simulate_sensor_data, daemon=True).start()
 
-# Route pour exposer les données agrégées
-@app.route('/data', methods=['GET'])
-def get_aggregated_data():
-    aggregated_data = {}
-    for sensor_id, data in data_buffers.items():
-        # Calculer la moyenne des dernières valeurs
-        aggregated_data[sensor_id] = sum(data) / len(data) if data else 0
-    return jsonify(aggregated_data)
 
-# Lancer l'API Flask
+# Fonction pour créer un graphique dynamique
+def create_plot():
+    """Génération dynamique du graphique avec Matplotlib"""
+    plt.figure(figsize=(10, 6))
+
+    for sensor_id, values in data_buffers.items():
+        plt.plot(values, label=sensor_id)
+
+    plt.xlabel('Temps')
+    plt.ylabel('Valeurs')
+    plt.title('Simulation IoT en Temps Réel')
+    plt.legend()
+    plt.grid()
+    
+    buf = BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+    plt.close()
+    return buf
+
+
+# Route principale pour l'affichage dynamique
+@app.route('/')
+def index():
+    """Page principale avec AJAX pour l'affichage dynamique"""
+    return render_template('index.html')
+
+
+# Route pour l'image du graphique
+@app.route('/plot')
+def plot():
+    buf = create_plot()
+    return Response(buf, mimetype='image/png')
+
+
+# Lancer le serveur
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(debug=True, host="0.0.0.0", port=5000)

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulation IoT Temps Réel</title>
+</head>
+<body>
+    <h1>Simulation des Données IoT - Graphique Temps Réel</h1>
+    <div>
+        <img id="plot" src="/plot" style="width: 80%; height: auto;">
+    </div>
+    
+    <script>
+        // Rafraîchissement automatique toutes les 500 ms
+        function refreshPlot() {
+            const img = document.getElementById("plot");
+            img.src = "/plot?" + new Date().getTime(); // Empêcher le cache avec un timestamp
+        }
+
+        setInterval(refreshPlot, 500);
+    </script>
+</body>
+</html>
